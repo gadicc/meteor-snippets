@@ -1,0 +1,12 @@
+<template name="snippet">
+	<div class="snippet">
+		<div>
+			{{#each alternatives}}
+				<span class="{{#if currentLang this}}active{{/if}}"
+					data-lang="{{this}}">{{this}}</span>
+			{{/each}}
+		</div>
+
+		{{#prism lang=currentLang class="line-numbers"}}{{#convert}}{{> UI.contentBlock}}{{/convert}}{{/prism}}
+	</div>
+</template>

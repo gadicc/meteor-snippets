@@ -1,0 +1,22 @@
+.snippet {
+	position: relative;
+}
+.snippet > div {
+	position: absolute;
+	top: 10px; right: 10px;	
+	z-index: 2;
+}
+/* Language label */
+.snippet > div > span {
+	cursor: pointer;
+	padding: 2px 5px 2px 5px;
+	margin-right: 2px;
+	border-radius: 5px;
+	font-family: arial;
+	background: #aaaaaa;
+	opacity: 0.5;
+}
+.snippet > div > span.active {
+	opacity: 1;
+	background: #ffffaa;
+}

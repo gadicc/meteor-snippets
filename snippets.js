@@ -8,29 +8,69 @@ var langGroups = {
 	'spacebars': ['jade', 'spacebars']
 };
 
+function currentLang(currentLang) {
+	if (currentLang) {
+		var snippetLang = Template.parentData(1).lang;
+		return Session.get('snippetLangs')[snippetLang] == currentLang;
+	} else
+		return Session.get('snippetLangs')[this.lang];	
+}
+
+Blaze.registerHelper('currentLang', currentLang);
+
 Template.snippet.helpers({
 
 	alternatives: function() {
 		return langGroups[this.lang];
 	},
 
-	currentLang: function(currentLang) {
-		if (currentLang) {
-			var snippetLang = Template.parentData(1).lang;
-			return Session.get('snippetLangs')[snippetLang] == currentLang;
-		} else
-			return Session.get('snippetLangs')[this.lang];
-	},
+	currentLang: currentLang,
 
-	convert: new Template('convert', function() {
-		var view = this;
+	code: new Template('code', function() {
+		// Template.snippet
+		var view = this.parentView.parentView.parentView.parentView;
     var content = '';
-    if (view.templateContentBlock) {
+    var runConvert = false;
+
+//    console.log(view);
+
+/*
+    if (view.templateElseBlock) {
+			view.templateElseBlock.helpers({currentLang:currentLang});
+			view.templateElseBlock.__helpers.set('currentLang', currentLang);
+  		console.log(view.templateElseBlock);
+    	var block = view.templateElseBlock.constructView();
+    	console.log(block);
+    	//console.log(Blaze._getTemplateHelper(block.template, 'currentLang'));
+    	//console.log(Blaze.View.prototype.lookup.call(block, 'currentLang')());
+
+//console.log(Blaze._toText(view.templateElseBlock, HTML.TEXTMODE.STRING));
+block2 = new Template('(elseBlock)', function() {
+	return block;
+});
+console.log(Blaze._toText(block2, HTML.TEXTMODE.STRING));
+    		
+//    		return view.templateElseBlock;
+ //   	}
+    }
+*/
+
+    if (view.templateElseBlock) {
+    	content = Blaze._toText(view.templateElseBlock, HTML.TEXTMODE.STRING);
+    }
+
+    if (!/\S+/.test(content) && view.templateContentBlock) {
+			var source = Template.parentData(1).lang;
+			var dest = Session.get('snippetLangs')[source];
+    	runConvert = true;
       content = Blaze._toText(view.templateContentBlock, HTML.TEXTMODE.STRING);
     }
 
-		var source = Template.parentData(1).lang;
-		var dest = Session.get('snippetLangs')[source];
+    // Remove initial newlines and initial indent
+		content = content.replace(/^\n*/, '');
+		var initialIndent = content.match(/^([\t ]*)/);
+		content = content.replace(new RegExp('^' + initialIndent[0], 'gm'), '');
+
 
 		// Support for famous-views
 		if (typeof FView !== 'undefined')
@@ -40,7 +80,7 @@ Template.snippet.helpers({
 				fview.autoHeight();
 		});
 
-    return HTML.Raw(convert(content, source, dest));
+    return HTML.Raw(runConvert ? convert(content, source, dest) : content);
   })
 
 });
@@ -93,10 +133,8 @@ var mappings = {
 		//out = out.replace(/\n[\t ]*([\w\.]+)[\t ]*\n/gm, ' $1');
 		return out;
 	},
+	//'spacebars:jade': spacebars2jade,
 	'spacebars:jade': function(code) {
-		code = code.replace(/^\n*/, '');
-		var indent = code.match(/^([\t ]*)/);
-		code = code.replace(new RegExp('^' + indent[0], 'gm'), '');
 		code = '// Apologies, Jade conversion is only partially done\n' + code;
 
 		var len = 0;

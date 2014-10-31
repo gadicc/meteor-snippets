@@ -8,13 +8,15 @@ I wouldn't suggest using this yet but don't let me stop you :>
 ```handlebars
   	{{#snippet lang="spacebars"}}
   		&lt;template name="famousInit">
-  			{{dstache}}#Surface size="[undefined,undefined]"}}
+  			{{#Surface size="[undefined,undefined]"}}
   				I am a full size Surface
-  			{{dstache}}/Surface}}
+  			{{/Surface}}
   		&lt;/template>
+  	{{else}}
+  		{{!-- optional section to include by-hand conversions}}
+  		{{#if currentLang "jade"}}
+  			template(name="famousInit")
+  			  +Surface size="[undefined,undefined]"
+  			    | I am a full size Surface
   	{{/snippet}}
 ```
-
-TODO:
-
-* Besides always auto converting, allow manual embedding of preformatted conversion.

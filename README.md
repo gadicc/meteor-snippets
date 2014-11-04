@@ -30,7 +30,7 @@ in the "else" section of your snippet block.
   			{{dstache}}/Surface}}
   		&lt;/template>
   	{{else}}
-  		{{dstache}}!-- optional section to include by-hand conversions --}}
+  		{{!-- optional section to include by-hand conversions --}}
   		{{#if currentLang "jade"}}
   			template(name="famousInit")
   			  +Surface size="[undefined,undefined]"

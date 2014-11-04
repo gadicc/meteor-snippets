@@ -1,7 +1,7 @@
 ## gadicohen:snippets
 
 This is a work in progress for the
-[famous-views website](http://famous-views.meteor.cmo/).
+[famous-views website](http://famous-views.meteor.com/).
 
 I wouldn't suggest using this yet but don't let me stop you :>
 

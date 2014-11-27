@@ -1,7 +1,7 @@
 Package.describe({
   name: "gadicohen:snippets",
   summary: 'Code snippets with highlighting and lang conversion',
-  version: "0.0.3",
+  version: "0.0.4",
   git: "https://github.com/gadicc/meteor-snippets.git"
 });
 
@@ -31,4 +31,5 @@ Package.on_use(function (api) {
   /* --- Acutal snippets code --- */
 
   api.add_files(['snippets.html', 'snippets.css', 'snippets.js'], 'client');
+  api.export('snippets');
 });

@@ -4,16 +4,23 @@ Session.setDefault('snippetLangs', {
 });
 
 var langGroups = {
-	'javascript': ['coffeescript', 'javascript'],
+	'javascript': ['coffee', 'javascript'],
 	'spacebars': ['jade', 'spacebars']
 };
 
+var langAliases = {
+	'coffeescript': 'coffee'
+};
+var L = function(lang) {
+	return langAliases[lang] || lang;
+}
+
 function currentLang(currentLang) {
 	if (currentLang) {
-		var snippetLang = Template.parentData(1).lang;
-		return Session.get('snippetLangs')[snippetLang] == currentLang;
+		var snippetLang = L(Template.parentData(1).lang);
+		return Session.get('snippetLangs')[snippetLang] == L(currentLang);
 	} else
-		return Session.get('snippetLangs')[this.lang];	
+		return Session.get('snippetLangs')[L(this.lang)];
 }
 
 Blaze.registerHelper('currentLang', currentLang);
@@ -21,7 +28,7 @@ Blaze.registerHelper('currentLang', currentLang);
 Template.snippet.helpers({
 
 	alternatives: function() {
-		return langGroups[this.lang];
+		return langGroups[L(this.lang)];
 	},
 
 	currentLang: currentLang,
@@ -115,7 +122,10 @@ Template.snippet.events({
 // XXX put somewhere nice
 js2coffee = require('js2coffee');
 
-function convert(code, source, dest) {
+function convert(code, source, dest, returnNull) {
+	source = L(source);
+	dest = L(dest);
+
 	if (source == dest)
 		return code;
 
@@ -124,11 +134,14 @@ function convert(code, source, dest) {
 	if (mappings[mapping])
 		return mappings[mapping](code, source, dest);
 
+	if (returnNull)
+		return null;
+
 	return "I don't know how to convert from " + source + ' to ' + dest;
 }
 
 var mappings = {
-	'javascript:coffeescript': function(code) {
+	'javascript:coffee': function(code) {
 		var out = js2coffee.build(code);
 		//out = out.replace(/\n[\t ]*([\w\.]+)[\t ]*\n/gm, ' $1');
 		return out;
@@ -194,4 +207,16 @@ var mappings = {
 
 		return code;
 	}
-}
+};
+
+var hasMapping = function(source, dest) {
+	return !!mappings[L(source)+':'+L(dest)];
+};
+
+/* Exports */
+
+snippets = {
+	convert: convert,
+	mappings: mappings,
+	hasMapping: hasMapping
+};

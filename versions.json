@@ -9,6 +9,10 @@
       "2.0.3"
     ],
     [
+      "coffeescript",
+      "1.0.4"
+    ],
+    [
       "deps",
       "1.0.5"
     ],
@@ -18,7 +22,7 @@
     ],
     [
       "gadicohen:prism",
-      "1.0.3"
+      "1.0.4"
     ],
     [
       "geojson-utils",

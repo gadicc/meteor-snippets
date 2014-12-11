@@ -7,35 +7,36 @@
  *
  */
 
+/* These next 3 functions are untouched from the original */
+
 var u = Random.id().toLowerCase();
-var builtins = ['if','unless','each','with'];
 
 var preProcessHtml = function(html) {
-  // <template> is interpretted in a special way by DOMParser
-  html = html.replace(/<template +name/g, '<spacebars_template name');
-  html = html.replace(/<\/template>/g, '</spacebars_template>');
+
+  // Process markdown
+  html = html.replace(/{{#markdown}}/g, '<!--\nmeteor-markdown\n');
+  html = html.replace(/{{\/markdown}}/g, '-->');
 
   // Process comments
   html = html.replace(/{{! ?(.*)}}/g, '<meteor-comment>$1</meteor-comment>');
   html = html.replace(/{{!--/g, '<meteor-comment>');
   html = html.replace(/--}}/g, '</meteor-comment>');
 
-  // Process {template/component} inclusion
-  html = html.replace(/{{> ?(.*?)}}/g, '<meteor-template-' + u + ' data=\'$1\'></meteor-template-' + u + '>');
+  // Process templates
+  html = html.replace(/{{> (.*?)}}/g, '<meteor-template-' + u + ' data=\'$1\'></meteor-template-' + u + '>');
 
-  // Block helpers
-  html = html.replace(/\{\{#([^ }]+)( ?[^}]*)\}\}/g,
-    function(match, name, attrs) {
-      return '<meteor-block-' + name + '-' + u +
-        (builtins.indexOf(name) === -1 ?
-          ' _origName="'+name+'"' : '') + attrs + '>';
-    });
-  html = html.replace(/\{\{\/([^ }]+)\}\}/g, '</meteor-block-$1-' + u + '>');
-  /*
-  html = html.replace(/\{\{#([^ \}]+)( ?[^ }]*)\}\}([\s\S]*?)\{\{\/\1\}\}/,
-    '<meteor-block-' + u + ' __jadeBlockName="$1"$2>$3</meteor-block-' + u + '>');
+  // Process statements
+  html = html.replace(/{{#if (.*?)}}/g, '<meteor-if-' + u + ' data=\'$1\'>');
+  html = html.replace(/{{#unless (.*?)}}/g, '<meteor-unless-' + u + ' data=\'$1\'>');
+  html = html.replace(/{{#each (.*?)}}/g, '<meteor-each-' + u + ' data=\'$1\'>');
+  html = html.replace(/{{#with (.*?)}}/g, '<meteor-with-' + u + ' data=\'$1\'>');
+  html = html.replace(/{{#block}}/g, '<meteor-block-' + u + '>');
   html = html.replace(/{{else}}/g, '<meteor-else-' + u + '></meteor-else-' + u + '>');
-  */
+  html = html.replace(/{{\/if}}/g, '</meteor-if-' + u + '>');
+  html = html.replace(/{{\/unless}}/g, '</meteor-unless-' + u + '>');
+  html = html.replace(/{{\/each}}/g, '</meteor-each-' + u + '>');
+  html = html.replace(/{{\/with}}/g, '</meteor-with-' + u + '>');
+  html = html.replace(/{{\/block}}/g, '</meteor-block-' + u + '>');
 
   // Process tags
   var t_match, a_match, v_match, sv_match;
@@ -96,14 +97,10 @@ var preProcessHtml = function(html) {
     }
   }
 
-  console.log(html);
   return html;
 };
 
 var postProcessJade = function(jade) {
-  // <template>
-  jade = jade.replace(/spacebars_template\(name/g, 'template(name');
-
 
   // Process markdown
   var m_match;
@@ -130,32 +127,12 @@ var postProcessJade = function(jade) {
   jade = jade.replace(new RegExp('meteor-template-' + u + '\\(data=\'(.*?)\'\\)', 'g'), '+$1');
 
   // Process statements
-  /*
   jade = jade.replace(new RegExp('meteor-if-' + u + '\\(data=\'(.*?)\'\\)', 'g'), 'if $1');
   jade = jade.replace(new RegExp('meteor-unless-' + u + '\\(data=\'(.*?)\'\\)', 'g'), 'unless $1');
   jade = jade.replace(new RegExp('meteor-each-' + u + '\\(data=\'(.*?)\'\\)', 'g'), 'each $1');
   jade = jade.replace(new RegExp('meteor-with-' + u + '\\(data=\'(.*?)\'\\)', 'g'), 'with $1');
-  jade = jade.replace(new RegExp('meteor-block-' + u, 'g'), 'block');
-  */
-  jade = jade.replace(new RegExp('meteor-block-(.*?)-' + u + '( ?.*)$', 'gm'),
-    function(match, name, attrs) {
-      if (builtins.indexOf(name) !== -1)
-        return name + attrs;
-      console.log(match, name, attrs);
-      var re = /_origname='(.*?)',? ?/;
-      match = re.exec(attrs);
-      // tmp
-      if (!match) return name + attrs;
-      console.log(match);
-      attrs = attrs.replace(re, '').replace(/\(\)/, '');
-      attrs = attrs.replace(/\((.*?)\=''\)/, ' $1'); // data context
-      return '+' + match[1] + attrs;
-      /*
-      name = attrs.split(' ', 1)[0].split('=')[1];
-      name = name.substr(1, name.length - 2); /* strip quotes */
-      //return '+' + name + attrs.substr(name.length + 12 /* _origName="" */);
-    });
   jade = jade.replace(new RegExp('  meteor-else-' + u, 'g'), 'else');
+  jade = jade.replace(new RegExp('meteor-block-' + u, 'g'), 'block');
 
   // Process tag variables
   jade = jade.replace(new RegExp('mdata-(\\w+)-' + u + '="(.*?)"', 'g'), '$1="$2"');
@@ -170,9 +147,6 @@ var postProcessJade = function(jade) {
 
   // Remove hanging spaces
   jade = jade.replace(/ *$/gm, '');
-
-  // Remove empty head
-  jade = jade.replace('head\nbody', 'body');
 
   return jade;
 };
@@ -202,21 +176,15 @@ Meteor.methods({
 
 */
 
-/* And this is our only actual change  NOT TRUE ANYMORE TODO UDPATE */
+/* And this is our only actual change */
 
 spacebars2jade = function(html) {
   if (html === '') { return ''; }
 
-  /*
-  var lastHtml;
-  while (lastHtml !== (html = preProcessHtml(html)))
-    lastHtml = html;
-  */
   html = preProcessHtml(html);
 
   var parser = new DOMParser();
-  var doc = parser.parseFromString(html, "text/html");
-  console.log(doc);
+  var doc = parser.parseFromString(html, "text/xml");
 	var converter = new Html2Jade.Converter({});
 	var output = new Html2Jade.StringOutput();
 	converter.document(doc, output);

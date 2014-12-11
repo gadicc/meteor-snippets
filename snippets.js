@@ -9,7 +9,8 @@ var langGroups = {
 };
 
 var langAliases = {
-	'coffeescript': 'coffee'
+	'coffeescript': 'coffee',
+	'js': 'javascript'
 };
 var L = function(lang) {
 	return langAliases[lang] || lang;
@@ -62,7 +63,7 @@ console.log(Blaze._toText(block2, HTML.TEXTMODE.STRING));
     }
 */
 
-    if (view.templateElseBlock) {
+    if (0 && view.templateElseBlock) {
     	content = Blaze._toText(view.templateElseBlock, HTML.TEXTMODE.STRING);
     }
 
@@ -80,12 +81,17 @@ console.log(Blaze._toText(block2, HTML.TEXTMODE.STRING));
 
 
 		// Support for famous-views
-		if (typeof FView !== 'undefined')
-		_.defer(function() {
+		if (typeof FView !== 'undefined') {
 			var fview = FView.from(view);
-			if (fview.autoHeight)
-				fview.autoHeight();
-		});
+			var surface = fview && fview.surface;
+			if (surface && surface.size && surface.size.length &&
+					(surface.size[0] === true || surface.size[1] === true))
+				Tracker.afterFlush(function() {
+					fview.surface._contentDirty = true;
+				});
+		}
+
+		// TODO, should also check if our scroll position changed for good UI
 
     return HTML.Raw(runConvert ? convert(content, source, dest) : content);
   })
@@ -146,8 +152,8 @@ var mappings = {
 		//out = out.replace(/\n[\t ]*([\w\.]+)[\t ]*\n/gm, ' $1');
 		return out;
 	},
-	//'spacebars:jade': spacebars2jade,
-	'spacebars:jade': function(code) {
+	'spacebars:jade': spacebars2jade,
+	'OLDspacebars:jade': function(code) {
 		code = '// Apologies, Jade conversion is only partially done\n' + code;
 
 		var len = 0;

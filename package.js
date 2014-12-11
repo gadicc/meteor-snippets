@@ -9,6 +9,8 @@ Package.on_use(function (api) {
   api.use('blaze@2.0.0');
   api.use('templating@1.0.0');
   api.use('session@1.0.0');
+  api.use('tracker@1.0.3');
+  api.use('coffeescript@1.0.0');
 
   api.use('gadicohen:prism@1.0.3');
 
@@ -21,7 +23,8 @@ Package.on_use(function (api) {
   // https://github.com/js2coffee/js2coffee
   api.add_files('lib/js2coffee-0.3.1.js', 'client');
 
-  api.add_files('lib/html2jade.js', 'client');
+  api.add_files('lib/he.js', 'client');
+  api.add_files('lib/html2jade.coffee', 'client');
 
   // Could make this into a separate package, see source and discussion
   // at https://groups.google.com/forum/#!topic/meteor-talk/Hrmt8_tyawM

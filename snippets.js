@@ -63,7 +63,7 @@ console.log(Blaze._toText(block2, HTML.TEXTMODE.STRING));
     }
 */
 
-    if (0 && view.templateElseBlock) {
+    if (view.templateElseBlock) {
     	content = Blaze._toText(view.templateElseBlock, HTML.TEXTMODE.STRING);
     }
 
@@ -147,72 +147,8 @@ function convert(code, source, dest, returnNull) {
 }
 
 var mappings = {
-	'javascript:coffee': function(code) {
-		var out = js2coffee.build(code);
-		//out = out.replace(/\n[\t ]*([\w\.]+)[\t ]*\n/gm, ' $1');
-		return out;
-	},
+	'javascript:coffee': js2coffee.build,
 	'spacebars:jade': spacebars2jade,
-	'OLDspacebars:jade': function(code) {
-		code = '// Apologies, Jade conversion is only partially done\n' + code;
-
-		var len = 0;
-		// {{#tag}}content{{/tag}}
-		while (code.length != len) {
-			len = code.length;
-			code = code.replace(/\{\{#([^ ]+)(.*?)\}\}([^]*?)[\n\t ]*\{\{\/\1\}\}/gm,
-				function(match, tag, attrs, content) {
-					var out = '+' + tag + attrs;
-					if (!/\n/.test(content)) out += ' ';
-					else if (!/\{\{|\</.test(content))
-						content = content.replace(/(\n[\t ])*\W/, '$1| ');
-					out += content;
-					return out;
-				});
-			code = code.replace(/^\n*/gm, '');
-		}
-
-		len = 0;
-		// <tag>content</tag>
-		while (code.length != len) {
-			len = code.length;
-			code = code.replace(/<([^ ]+) *(.*?)>([^]*?)<\/\1>/gm,
-				function(match, tag, attrs, content) {
-					var out = tag;
-					if (attrs) out += '(' + attrs.replace(/ /, ', ') + ')';
-					//if (content[0] != '\n') out += '\n' + tagIndent + '  ';
-					if (!/\n/.test(content)) out += ' ';
-					else if (!/^\n[\t ]*\+/.test(content)) content = content.replace(/(\n[\t ])*/, '$1| ');
-					out += content;
-					return out;
-				});
-		}
-
-		// comments
-		code = code.replace(/^([\t ]*)\{\{!-- (.*?) --\}\}/gm, '$1// $2');
-		// inclusion
-		code = code.replace(/\{\{>([^ ]+)(.*?)\}\}/gm, '+$1$2');
-		// single tags
-		code = code.replace(/<([^ ]+) *(.*?)>/gm, function(match, tag, attrs) {
-			var out = tag;
-			if (attrs) out += '(' + attrs.replace(/ /, ', ') + ')';
-			//if (content[0] != '\n') out += '\n' + tagIndent + '  ';
-			return out;			
-		});
-		// variables (TODO, escape variables in attributes before this)
-		code = code.replace(/\{\{(.*?)\}\}/g, '#{$1}');
-
-		/*
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(code, "text/xml");
-		var converter = new Html2Jade.Converter({});
-		var output = new Html2Jade.StringOutput();
-		converter.document(doc, output);
-		var jade = output.final();
-		*/
-
-		return code;
-	}
 };
 
 var hasMapping = function(source, dest) {

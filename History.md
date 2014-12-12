@@ -1,8 +1,8 @@
-# Changelog
+# Change Log
 
 # Coming soon
 
-* Coffee->JS
+* Coffee->JS, Jade->HTML (and eventually Spacebars)
 
 ## v0.0.5
 

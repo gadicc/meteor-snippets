@@ -1,7 +1,7 @@
 Package.describe({
   name: "gadicohen:snippets",
   summary: 'Code snippets with highlighting and lang conversion',
-  version: "0.0.4",
+  version: "0.0.5",
   git: "https://github.com/gadicc/meteor-snippets.git"
 });
 

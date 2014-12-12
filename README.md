@@ -8,9 +8,9 @@ I wouldn't suggest using this yet but don't let me stop you :>
 ```handlebars
   	{{#snippet lang="spacebars"}}
   		&lt;template name="famousInit">
-  			{{#Surface size="[undefined,undefined]"}}
+  			{{dstache}}#Surface size="[undefined,undefined]"}}
   				I am a full size Surface
-  			{{/Surface}}
+  			{{dstache}}/Surface}}
   		&lt;/template>
     {{/snippet}}
 ```
@@ -21,7 +21,7 @@ the target language.  Current code groups are JavaScript/CoffeeScript and
 Spacebars/Jade.
 
 Sometimes code looks much better by hand, so you can also include
-hand-crafted conversions in the "else" section of your snippet block.
+hand-crafted conversions in the `else` section of your snippet block.
 
 ```handlebars
   	{{#snippet lang="spacebars"}}
@@ -43,12 +43,19 @@ hand-crafted conversions in the "else" section of your snippet block.
 If the right language exists in the else block, it will be shown instead, otherwise
 conversion happens like usual.
 
-Note: If you're coding in spacebars, and want to give a spacebars example in 
-spacebars, you need to escape your moustache tags (like with a 'dstache' helper
+> Note: If you're coding in spacebars, and want to give a **spacebars example in 
+spacebars**, you need to escape your moustache tags (like with a 'dstache' helper
 like the one used in Meteor docs).
+
+```js
+Template.registerHelper('dstache', function() { return '{{'; });
+```
+
+> Note: we automatically de-indent the "initial indent" of your code blocks,
+so you can still indent them inside the `{{#snippet}}` tags.
 
 ## API
 
-`snippets.hasMapping(source, dest)` - boolean, can we do this conversion?
-`snippets.convert(code, source, dest, returnNull)` - if returnNull, returns null if
-no mapping exists.  Otherwise a message.
+* `snippets.hasMapping(source, dest)` - boolean, can we do this conversion?
+* `snippets.convert(code, source, dest, returnNull)` - if returnNull, returns null if
+no mapping exists.  Otherwise a message (in English).
